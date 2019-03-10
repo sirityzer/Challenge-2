@@ -16,10 +16,18 @@ public class PlayerController : MonoBehaviour
     public Text loseText;
     public AudioSource regular;
     public AudioSource win;
+    public Animator animator;
     private int count;
     private int lives;
+    private SpriteRenderer spriteRenderer;
+    //private Animator animator;
     bool grounded = false;
     // Start is called before the first frame update
+    void Awake()
+    {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        animator = GetComponent<Animator>();
+    }
     void Start()
     {
         rb2d = GetComponent<Rigidbody2D>();
@@ -36,8 +44,11 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
-    
+        if (Input.GetKey("escape"))
+        {
+            Application.Quit();
+        }
+
     }
     void FixedUpdate()
     {
@@ -46,6 +57,13 @@ public class PlayerController : MonoBehaviour
         Vector2 movement = new Vector2(moveHorizontal, 0);
         rb2d.AddForce(movement * speed);
         rb2d.rotation = 0.0f;
+        bool flipSprite = (spriteRenderer.flipX ? (moveHorizontal > 0.01f):(moveHorizontal<0.01f));
+        if (flipSprite)
+        {
+            spriteRenderer.flipX = !spriteRenderer.flipX;
+        }
+       // animator.SetBool("grounded", grounded);
+        animator.SetFloat("speed",Mathf.Abs (moveHorizontal));
        
     }
     void OnTriggerEnter2D(Collider2D other)
@@ -95,16 +113,19 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.collider.tag == "Ground")
         {
+            
             if (rb2d.velocity.y<0)
             {
-
+                animator.SetBool("IsJumping", false);
 
                 if (Input.GetKey(KeyCode.UpArrow))
                 {
                     rb2d.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
                     grounded = false;
+                    animator.SetBool("IsJumping", true);
                 }
             }
         }
     }
+   
 }
